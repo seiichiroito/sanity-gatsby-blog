@@ -4,6 +4,7 @@ import AuthorList from "./author-list";
 import Container from "./container";
 import PortableText from "./portableText";
 import React from "react";
+import { Link } from "gatsby";
 import { buildImageObj } from "../lib/helpers";
 import { imageUrlFor } from "../lib/image-url";
 
@@ -51,7 +52,11 @@ function BlogPost(props) {
                 <h3 className={styles.categoriesHeadline}>Categories</h3>
                 <ul>
                   {categories.map((category) => (
-                    <li key={category._id}>{category.title}</li>
+                    <li key={category._id}>
+                      <Link to={`/categories/${category.slug}`}>
+                        {category.title}
+                      </Link>
+                    </li>
                   ))}
                 </ul>
               </div>

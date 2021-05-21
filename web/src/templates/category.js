@@ -11,6 +11,12 @@ export const query = graphql`
     category: sanityCategory(id: { eq: $id }) {
       title
       description
+      slug
+      middleCategories {
+        title
+        slug
+        id
+      }
       posts {
         _id
         title
@@ -24,9 +30,9 @@ export const query = graphql`
 `;
 
 const CategoryPostTemplate = (props) => {
-  console.log(props);
   const { data = {}, errors } = props;
-  const { title, description, posts } = data.category || {};
+  const { title, description, slug, middleCategories, posts } =
+    data.category || {};
 
   return (
     <Layout>
@@ -37,6 +43,20 @@ const CategoryPostTemplate = (props) => {
         <article>
           <h1>Category: {title}</h1>
           <p>{description}</p>
+          {middleCategories && (
+            <>
+              <h2>Child Categories</h2>
+              <ul>
+                {middleCategories.map((middleCategory) => (
+                  <li key={middleCategory.id}>
+                    <Link to={`/categories/${slug}/${middleCategory.slug}`}>
+                      {middleCategory.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
 
           {posts && (
             <>
