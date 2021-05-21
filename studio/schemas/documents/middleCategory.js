@@ -1,7 +1,7 @@
 export default {
-  name: "category",
+  name: "middleCategory",
   type: "document",
-  title: "Category",
+  title: "Middle category",
   fields: [
     {
       name: "title",
@@ -15,19 +15,6 @@ export default {
       options: {
         source: "title",
       },
-    },
-    {
-      name: "middleCategories",
-      type: "array",
-      title: "Middle categories",
-      of: [
-        {
-          type: "reference",
-          to: {
-            type: "middleCategory",
-          },
-        },
-      ],
     },
     {
       name: "description",

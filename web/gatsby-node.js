@@ -46,6 +46,108 @@ async function createBlogPostPages(graphql, actions) {
     });
 }
 
+async function createCategoryPages(graphql, actions) {
+  const { createPage } = actions;
+
+  const result = await graphql(`
+    {
+      allSanityCategory {
+        nodes {
+          slug
+          id
+        }
+      }
+    }
+  `);
+
+  if (result.errors) throw result.errors;
+
+  const categoryNodes = (result.data.allSanityCategory || {}).nodes || [];
+
+  categoryNodes.forEach((node) => {
+    const { id, slug = {} } = node;
+
+    if (!slug) return;
+
+    const path = `/categories/${slug}`;
+
+    createPage({
+      path,
+      component: require.resolve("./src/templates/category.js"),
+      context: { id },
+    });
+  });
+}
+async function createMiddleCategoryPages(graphql, actions) {
+  const { createPage } = actions;
+
+  const result = await graphql(`
+    {
+      allSanityCategory {
+        nodes {
+          slug
+          id
+          middleCategories {
+            secondSlug: slug
+            secondId: id
+          }
+        }
+      }
+    }
+  `);
+
+  if (result.errors) throw result.errors;
+
+  const categoryNodes = (result.data.allSanityCategory || {}).nodes || [];
+
+  categoryNodes.forEach((node) => {
+    const { id, slug = {}, middleCategories } = node;
+
+    middleCategories.forEach((middleNode) => {
+      const { secondId, secondSlug = {} } = middleNode;
+
+      if (!slug || !secondSlug) return;
+
+      const path = `/categories/${slug}/${secondSlug}`;
+
+      createPage({
+        path,
+        component: require.resolve("./src/templates/middleCategory.js"),
+        context: { id, secondId },
+      });
+    });
+  });
+}
+
+exports.createResolvers = ({ createResolvers }) => {
+  const resolvers = {
+    SanityCategory: {
+      posts: {
+        type: ["SanityPost"],
+        resolve(source, args, context, info) {
+          return context.nodeModel.runQuery({
+            type: "SanityPost",
+            query: {
+              filter: {
+                categories: {
+                  elemMatch: {
+                    _id: {
+                      eq: source._id,
+                    },
+                  },
+                },
+              },
+            },
+          });
+        },
+      },
+    },
+  };
+  createResolvers(resolvers);
+};
+
 exports.createPages = async ({ graphql, actions }) => {
   await createBlogPostPages(graphql, actions);
+  await createCategoryPages(graphql, actions);
+  await createMiddleCategoryPages(graphql, actions);
 };
